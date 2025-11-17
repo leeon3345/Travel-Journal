@@ -2,7 +2,7 @@
 
 사용자가 여행의 추억을 기록하고 관리할 수 있는 웹 애플리케이션. 브라우저의 `localStorage`를 활용하여 오프라인 상태에서도 모든 기능이 정상적으로 작동.
 
-!Travel Journal Screenshot
+![Travel Journal Screenshot](./img/travel-journal-screenshot.png)
 
 
 ✨ **주요 기능**
