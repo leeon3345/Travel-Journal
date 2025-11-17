@@ -4,7 +4,9 @@ const cityInput = document.getElementById("cityInput");
 const dateInput = document.getElementById("dateInput");
 const memoInput = document.getElementById("memoInput");
 const journalList = document.getElementById("journalList");
+const imageInput = document.getElementById("imageInput");
 const errorBox = document.getElementById("error");
+const imageUploadLabel = document.querySelector('label[for="imageInput"]');
 
 // --- LocalStorage 키 ---
 const STORAGE_KEY = "travelEntries";
@@ -17,15 +19,31 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /**
+ * 파일 입력 변경 시: 라벨 업데이트
+ */
+imageInput.addEventListener('change', () => {
+    if (imageInput.files && imageInput.files.length > 0) {
+        const fileName = imageInput.files[0].name;
+        // 파일 이름이 너무 길면 잘라내기
+        const displayName = fileName.length > 30 ? fileName.substring(0, 27) + '...' : fileName;
+        imageUploadLabel.textContent = `✓ ${displayName}`; // 체크 표시와 파일 이름
+        imageUploadLabel.classList.add('selected');
+    } else {
+        resetImageInputLabel();
+    }
+});
+
+/**
  * 2. 폼 제출 시: 새 항목 추가
  */
-entryForm.addEventListener("submit", (e) => {
+entryForm.addEventListener("submit", async (e) => {
     e.preventDefault(); // 폼 새로고침 방지
 
     // 입력값 가져오기 [cite: 67]
     const city = cityInput.value.trim();
     const date = dateInput.value;
     const memo = memoInput.value.trim();
+    const imageFile = imageInput.files[0];
 
     // 입력값 검증 (예외 처리) [cite: 67]
     if (!city || !date) {
@@ -34,21 +52,30 @@ entryForm.addEventListener("submit", (e) => {
     }
     clearError();
 
+    let imageData = null;
+    if (imageFile) {
+        // 파일 크기 제한 (예: 5MB)
+        if (imageFile.size > 5 * 1024 * 1024) {
+            showError("이미지 파일은 5MB를 초과할 수 없습니다.");
+            return;
+        }
+        imageData = await readFileAsDataURL(imageFile);
+    }
+
     // 고유 ID 생성 (현재 시간을 밀리초로)
     const newEntry = {
         id: new Date().getTime(),
         city: city,
         date: date,
         memo: memo,
+        image: imageData,
     };
 
     // 항목 추가
     addEntry(newEntry);
 
     // 폼 초기화
-    cityInput.value = "";
-    dateInput.value = "";
-    memoInput.value = "";
+    resetForm();
 });
 
 /**
@@ -110,12 +137,18 @@ function renderEntry(entry) {
         day: 'numeric'
     });
 
+    // 이미지 템플릿
+    const imageHTML = entry.image
+        ? `<img src="${entry.image}" alt="${entry.city} 사진" class="entry-image">`
+        : "";
+
     entryDiv.innerHTML = `
         <div class="entry-header">
             <span class="entry-city">${entry.city}</span>
             <span class="entry-date">${formattedDate}</span>
         </div>
         <p class="entry-memo">${entry.memo.replace(/\n/g, "<br>")}</p>
+        ${imageHTML}
         <button class="delete-btn" data-id="${entry.id}">×</button>
     `;
 
@@ -137,6 +170,36 @@ function loadEntries() {
     journalList.innerHTML = ""; // 목록 초기화
     // 오래된 항목이 아래로 가도록 순서대로 렌더링
     entries.forEach((entry) => renderEntry(entry));
+}
+
+/**
+ * 9. 파일을 Base64 데이터 URL로 읽기 (Promise 반환)
+ */
+function readFileAsDataURL(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            resolve(reader.result);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+/**
+ * 10. 폼과 이미지 라벨 초기화
+ */
+function resetForm() {
+    entryForm.reset(); // 폼의 모든 필드를 초기값으로 리셋
+    resetImageInputLabel();
+}
+
+/**
+ * 이미지 입력 라벨을 기본 상태로 되돌림
+ */
+function resetImageInputLabel() {
+    imageUploadLabel.textContent = '사진 추가 (1장)';
+    imageUploadLabel.classList.remove('selected');
 }
 
 // --- 유틸리티 함수 ---

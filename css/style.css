@@ -60,6 +60,35 @@ h1 {
     resize: vertical;
 }
 
+/* --- 이미지 업로드 버튼 스타일 --- */
+.image-upload-label {
+    display: block;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px dashed #c7c7c4;
+    background: #fbfbfa;
+    color: #7e7e7c;
+    font-size: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+}
+.image-upload-label:hover {
+    background: #f5f5f3;
+    border-color: #9b9a97;
+}
+.image-upload-label.selected {
+    background: #e9f5e9; /* 연한 녹색 배경 */
+    border-color: #4caf50; /* 녹색 테두리 */
+    color: #2e7d32; /* 진한 녹색 텍스트 */
+    font-weight: 500;
+}
+
+/* 실제 파일 input은 숨김 */
+input[type="file"] {
+    display: none;
+}
+
 .submit-btn {
     padding: 12px 14px;
     border: none;
@@ -128,6 +157,15 @@ h1 {
     font-size: 16px;
     color: #5a5a58;
     line-height: 1.5;
+}
+
+.entry-image {
+    width: 100%;
+    height: auto;
+    border-radius: 6px;
+    margin-top: 16px;
+    object-fit: cover;
+    border: 1px solid #e2e2e0;
 }
 
 .delete-btn {
